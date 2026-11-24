@@ -6,7 +6,7 @@ O projeto está vinculado à ODS 15 — Vida Terrestre, especialmente à meta 15
 
 ## 2. Delimitação do problema
 
-O estudo abrange Petrolina (PE) e Juazeiro (BA), utilizando células de 1 km², com rótulos de 2017 a 2025 e atributos temporalmente anteriores ao desfecho, conforme as decisões D1 a D5. Serão considerados dados do PRODES, MapBiomas, queimadas, precipitação e estradas, sujeitos à avaliação de disponibilidade e vazamento. Excluem-se a fiscalização em tempo real, a identificação de infratores e a generalização para outros biomas.
+O estudo abrange Petrolina (PE) e Juazeiro (BA), utilizando células de 1 km², com rótulos de 2017 a 2025 e atributos temporalmente anteriores ao desfecho, conforme as decisões [D1 a D5](./decisoes-tecnicas.md). Serão considerados dados do PRODES, MapBiomas, queimadas, precipitação e estradas, sujeitos à avaliação de disponibilidade e vazamento. Excluem-se a fiscalização em tempo real, a identificação de infratores e a generalização para outros biomas.
 
 ## 3. Pergunta de pesquisa
 
