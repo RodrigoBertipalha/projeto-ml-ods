@@ -1,0 +1,20 @@
+#!/bin/sh
+# Recusa commits com arquivos > 20 MB (o .gitignore não filtra por tamanho).
+# Ativar uma vez por clone: git config core.hooksPath .githooks
+
+limite=$((20 * 1024 * 1024))
+
+git -c core.quotepath=off diff --cached --name-only --diff-filter=ACMR | {
+    status=0
+    while IFS= read -r arquivo; do
+        tamanho=$(git cat-file -s ":$arquivo")  # tamanho da versão staged
+        if [ "$tamanho" -gt "$limite" ]; then
+            echo "pre-commit: '$arquivo' tem $((tamanho / 1024 / 1024)) MB (limite: 20 MB)." >&2
+            status=1
+        fi
+    done
+    if [ "$status" -ne 0 ]; then
+        echo "Commit recusado. Dados vão em data/ (ignorado pelo git), não no repositório." >&2
+    fi
+    exit $status
+}

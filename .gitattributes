@@ -1,0 +1,2 @@
+# Hooks são scripts sh: precisam de LF mesmo em clones no Windows
+.githooks/* text eol=lf
