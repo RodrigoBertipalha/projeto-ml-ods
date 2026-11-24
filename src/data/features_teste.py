@@ -1,10 +1,12 @@
 """Monta a tabela célula × ano do recorte de teste (Petrolina/Juazeiro).
 
 Para cada célula da grade e cada ano-alvo t (2017–2025):
-    pct_veg_nativa_t1  % da célula com vegetação nativa no MapBiomas de t−1
+    pct_veg_nativa_t2  % da célula com vegetação nativa no MapBiomas de t−2
     focos_t1           nº de focos (satélite de referência) de 1º/ago de t−2 a 31/jul de t−1
     desmat_acum_t1     fração da célula já desmatada no PRODES até t−1
-    alvo               1 se a célula teve incremento de desmatamento PRODES no ano t
+    alvo               1 se a célula teve ≥ 0,01 km² (1 ha) de incremento PRODES no ano t
+
+Justificativas em docs/decisoes-tecnicas.md.
 
 Entradas: data/interim/grade_teste.parquet e data/raw/ (ver docs/fontes-de-dados.md).
 Saída: data/interim/tabela_teste.parquet
@@ -30,6 +32,7 @@ MAPBIOMAS = RAW / "mapbiomas" / "mapbiomas_c10_petrolina_juazeiro_2015_2024.tif"
 
 ANOS_ALVO = range(2017, 2026)  # 2016 fica de fora: sem PRODES 2015, o incremento de 2016 acumula 2 anos
 BBOX = (-40.97, -10.0, -39.84, -8.61)  # recorte (lon/lat) usado nos downloads
+LIMIAR_ALVO_KM2 = 0.01  # 1 ha, área mínima mapeável do PRODES; evita lascas de polígono na borda
 
 # MapBiomas Col. 10: formações florestais (3, 4, 5, 6, 49) e não florestais
 # (11, 12, 32, 50). Afloramento rochoso (29), água e usos antrópicos não contam.
@@ -58,7 +61,10 @@ def area_desmatada(grade) -> pd.DataFrame:
 
 
 def pct_vegetacao_nativa(grade) -> pd.DataFrame:
-    """% de pixels de vegetação nativa por célula no MapBiomas do ano t−1.
+    """% de pixels de vegetação nativa por célula no MapBiomas do ano t−2.
+
+    t−2 e não t−1: o mapa anual de t−1 pode já mostrar derrubadas de ago–dez
+    de t−1, que o PRODES conta no rótulo de t (vazamento residual).
 
     Rasteriza o índice das células na grade do MapBiomas (cada pixel de 30 m
     vai para a célula que contém seu centro) e conta classes com bincount.
@@ -70,13 +76,13 @@ def pct_vegetacao_nativa(grade) -> pd.DataFrame:
                         out_shape=src.shape, transform=src.transform, fill=0, dtype="int32")
         linhas = []
         for t in ANOS_ALVO:
-            classe = src.read(src.descriptions.index(f"classification_{t - 1}") + 1)
+            classe = src.read(src.descriptions.index(f"classification_{t - 2}") + 1)
             valido = (idx > 0) & (classe > 0)
             total = np.bincount(idx[valido], minlength=len(celulas) + 1)[1:]
             nativa = np.bincount(idx[valido & np.isin(classe, VEG_NATIVA)],
                                  minlength=len(celulas) + 1)[1:]
             linhas.append(pd.DataFrame({"cell_id": celulas["cell_id"].to_numpy(), "ano": t,
-                                        "pct_veg_nativa_t1": 100 * nativa / total}))
+                                        "pct_veg_nativa_t2": 100 * nativa / total}))
     return pd.concat(linhas, ignore_index=True)
 
 
@@ -112,7 +118,7 @@ def main():
         "cell_id": np.repeat(area.index.to_numpy(), len(ANOS_ALVO)),
         "ano": np.tile(list(ANOS_ALVO), len(area)),
         "desmat_acum_t1": acumulado[[t - 1 for t in ANOS_ALVO]].to_numpy().ravel().clip(max=1),
-        "alvo": (area[list(ANOS_ALVO)].to_numpy().ravel() > 0).astype("int8"),
+        "alvo": (area[list(ANOS_ALVO)].to_numpy().ravel() >= LIMIAR_ALVO_KM2).astype("int8"),
     })
 
     tabela = (prodes
@@ -121,7 +127,7 @@ def main():
               .merge(contar_focos(grade), on=["cell_id", "ano"], how="left"))
     tabela["focos_t1"] = tabela["focos_t1"].fillna(0).astype("int32")
     tabela = tabela[["cell_id", "ano", "code_muni", "municipio", "uf",
-                     "pct_veg_nativa_t1", "focos_t1", "desmat_acum_t1", "alvo"]]
+                     "pct_veg_nativa_t2", "focos_t1", "desmat_acum_t1", "alvo"]]
 
     SAIDA.parent.mkdir(parents=True, exist_ok=True)
     tabela.to_parquet(SAIDA, index=False)

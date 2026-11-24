@@ -63,7 +63,7 @@ Origem: `https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Br
 
 Exportado do Google Earth Engine com `src/data/gee_mapbiomas.js` (asset
 `projects/mapbiomas-public/assets/brazil/lulc/v1`, `collection_id = 10`,
-`version = v1`). Export levou poucos minutos. GeoTIFF `uint8`, 10 bandas
+`version = v1`). Export levou 3 min (iniciado em 23/11/2026 23:25 BRT). GeoTIFF `uint8`, 10 bandas
 `classification_2015` … `classification_2024`, EPSG:4326, grade nativa de
 ~30 m (0,000269°), 4194 × 5161 pixels. Licença CC-BY-4.0.
 
