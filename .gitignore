@@ -1,0 +1,26 @@
+# --- Dados: nunca versionados (baixados/gerados localmente) ---
+data/raw/
+data/interim/
+data/processed/
+
+# --- Ambiente Python ---
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# --- Formatos geoespaciais/compactados normalmente grandes ---
+# O .gitignore não filtra por tamanho; arquivos > 20 MB são barrados
+# pelo hook de pre-commit (ver .githooks/pre-commit).
+*.tif
+*.tiff
+*.zip
+*.7z
+*.rar
+*.nc
+
+# --- Sistema/editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
