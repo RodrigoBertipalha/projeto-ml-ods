@@ -18,7 +18,7 @@ Será utilizada classificação binária supervisionada desbalanceada, devido à
 
 ## 5. Métrica de avaliação
 
-A PR-AUC será a métrica primária por avaliar a relação entre precisão e revocação em dados desbalanceados. A acurácia isolada pode mascarar a incapacidade de identificar áreas ameaçadas.
+A PR-AUC será a métrica primária por avaliar a relação entre precisão e revocação em dados desbalanceados, considerando tanto os gastos desnecessários de monitoramento quanto a não identificação de áreas ameaçadas. A acurácia isolada pode mascarar esses erros.
 
 ## 6. Público beneficiado e decisão operacional
 
