@@ -1,10 +1,10 @@
-"""Gera a grade de 1 km do recorte de teste (Petrolina-PE e Juazeiro-BA).
+"""Gera a grade de 1 km do recorte do projeto (Petrolina-PE e Juazeiro-BA, T1).
 
-Saída: data/interim/grade_teste.parquet (GeoParquet, EPSG:31984) com
+Saída: data/interim/grade.parquet (GeoParquet, EPSG:31984) com
 cell_id, code_muni, municipio, uf, geometry.
 
 Uso (na raiz do repositório):
-    python src/data/grid_teste.py
+    python src/data/grade.py
 """
 
 import time
@@ -16,7 +16,7 @@ import numpy as np
 import shapely
 
 ROOT = Path(__file__).resolve().parents[2]
-SAIDA = ROOT / "data" / "interim" / "grade_teste.parquet"
+SAIDA = ROOT / "data" / "interim" / "grade.parquet"
 
 MUNICIPIOS = [2611101, 2918407]  # Petrolina-PE, Juazeiro-BA (códigos IBGE)
 ANO_MALHA = 2022                 # malha municipal IBGE usada pelo geobr
