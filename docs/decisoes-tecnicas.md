@@ -127,6 +127,16 @@ anteriores ao período do rótulo de t. Para t = 2017, `alvo_t1` usa o PRODES
 2016, que acumula dois anos (D1); a taxa de `alvo_t1` em 2017 é, por isso,
 maior.
 
+## D11. Bloco espacial de 10 km (`bloco_espacial`)
+
+**Decisão:** cada célula recebe o bloco de 10 × 10 km que a contém (ex.:
+`B033_889`), derivado da grade alinhada. São 143 blocos; os do interior têm
+100 células, os da borda dos municípios ficam parciais.
+
+**Justificativa:** células vizinhas são parecidas (dependência espacial,
+citada na proposta). Separar treino e teste por bloco, e não por célula,
+evita que o modelo seja avaliado em células coladas às que viu no treino.
+
 ## Colunas excluídas por vazamento
 
 Calculadas ou disponíveis, mas **não** entram na base:
@@ -141,7 +151,7 @@ Calculadas ou disponíveis, mas **não** entram na base:
 | Polígonos PRODES `RESERVATORIO` | Não são desmatamento (alagamento de represa) |
 
 **Identificadores, não atributos:** `cell_id`, `ano`, `code_muni`,
-`municipio`, `uf`. Servem para juntar tabelas, separar treino/teste no tempo
+`municipio`, `uf`, `bloco_espacial`. Servem para juntar tabelas, separar treino/teste no tempo
 e no espaço e analisar subgrupos (T16); não devem entrar no modelo.
 
 ## Outras decisões de implementação

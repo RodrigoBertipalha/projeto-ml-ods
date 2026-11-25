@@ -8,6 +8,7 @@ Para cada célula da grade e cada ano-alvo t (2017–2025):
     dist_via_principal_km  distância do centro da célula à via principal mais próxima (OSM jan/2020)
     desmat_acum_t1         fração da célula já desmatada no PRODES até t−1
     alvo_t1                1 se houve ≥ 1 ha de incremento PRODES em t−1 (persistência, baseline T12)
+    bloco_espacial         bloco de 10 × 10 km da célula (identificador para validação espacial)
     alvo                   1 se a célula teve ≥ 0,01 km² (1 ha) de incremento PRODES no ano t
 
 Justificativas e colunas excluídas por vazamento em docs/decisoes-tecnicas.md.
@@ -42,6 +43,7 @@ ANOS_ALVO = range(2017, 2026)  # 2016 fica de fora: sem PRODES 2015, o increment
 BBOX = (-40.97, -10.0, -39.84, -8.61)  # recorte (lon/lat) usado nos downloads
 LIMIAR_ALVO_KM2 = 0.01  # 1 ha, área mínima mapeável do PRODES; evita lascas de polígono na borda
 RAIO_FOCOS_M = 5000
+TAM_BLOCO_M = 10_000  # blocos de 10 × 10 km para validação cruzada espacial
 MARGEM_GRAUS = 0.3  # ~33 km além do recorte, para focos e vias logo após a borda
 
 # MapBiomas Col. 10: formações florestais (3, 4, 5, 6, 49) e não florestais
@@ -169,6 +171,19 @@ def distancia_via_principal(grade) -> pd.DataFrame:
     return pd.DataFrame({"cell_id": perto["cell_id"], "dist_via_principal_km": perto["dist_m"] / 1000})
 
 
+def bloco_espacial(grade) -> pd.DataFrame:
+    """Bloco de 10 × 10 km que contém a célula (ex.: B033_889, canto inferior esquerdo em 10 km).
+
+    A grade é alinhada a múltiplos de 1 km, então cada célula cai inteira num
+    bloco. Serve para separar treino/teste por região (dependência espacial).
+    """
+    canto = grade.geometry.bounds
+    x = (canto["minx"] // TAM_BLOCO_M).astype(int)
+    y = (canto["miny"] // TAM_BLOCO_M).astype(int)
+    return pd.DataFrame({"cell_id": grade["cell_id"],
+                         "bloco_espacial": "B" + x.map("{:03d}".format) + "_" + y.map("{:03d}".format)})
+
+
 def sha256(caminho: Path) -> str:
     return hashlib.sha256(caminho.read_bytes()).hexdigest()
 
@@ -191,13 +206,14 @@ def main():
 
     base = (prodes
             .merge(grade[["cell_id", "code_muni", "municipio", "uf"]], on="cell_id")
+            .merge(bloco_espacial(grade), on="cell_id")
             .merge(pct_vegetacao_nativa(grade), on=["cell_id", "ano"])
             .merge(contar_focos(grade, carregar_focos(grade.crs)), on=["cell_id", "ano"], how="left")
             .merge(chuva(grade), on=["cell_id", "ano"])
             .merge(distancia_via_principal(grade), on="cell_id"))
     for col in ("focos_t1", "focos_5km_t1"):
         base[col] = base[col].fillna(0).astype("int32")
-    base = base[["cell_id", "ano", "code_muni", "municipio", "uf",
+    base = base[["cell_id", "ano", "code_muni", "municipio", "uf", "bloco_espacial",
                  "pct_veg_nativa_t2", "focos_t1", "focos_5km_t1", "chuva_t1_mm",
                  "dist_via_principal_km", "desmat_acum_t1", "alvo_t1", "alvo"]]
     assert len(base) == len(grade) * len(ANOS_ALVO) and not base.isna().any().any()
@@ -209,6 +225,7 @@ def main():
     print(resumo.to_string(formatters={"proporcao": "{:.1%}".format}))
     print(f"Total: {base['alvo'].mean():.1%} positivos")
     print(base.drop(columns=["code_muni", "ano"]).describe().round(3).to_string())
+    print(f"{base['bloco_espacial'].nunique()} blocos espaciais de 10 km")
     print(f"{len(base)} linhas -> {SAIDA.relative_to(ROOT)} "
           f"({SAIDA.stat().st_size / 1e6:.2f} MB, {time.perf_counter() - inicio:.1f} s)")
     print(f"SHA-256: {sha256(SAIDA)}")
