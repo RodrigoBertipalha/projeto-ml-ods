@@ -28,7 +28,7 @@ O estudo utiliza células de 1 km² e rótulos anuais de 2017 a 2025. O alvo ind
 - **Programa Queimadas (INPE):** focos de queimadas do satélite de referência.
 - **IBGE, via geobr:** limites municipais para construção da grade.
 
-Para a base completa, está prevista a avaliação de precipitação do **CHIRPS** e estradas do **OpenStreetMap**, sujeitas à disponibilidade e ao controle de vazamento. Origens, arquivos e hashes das fontes utilizadas estão em [fontes de dados](docs/fontes-de-dados.md). As licenças e bases legais das demais fontes ainda precisam ser documentadas; a licença do código do projeto não determina a licença dos datasets.
+A base completa acrescenta precipitação do **CHIRPS** e distância a vias principais do **OpenStreetMap**, com o controle de vazamento descrito nas [decisões técnicas](docs/decisoes-tecnicas.md). Origens, arquivos e hashes das fontes utilizadas estão em [fontes de dados](docs/fontes-de-dados.md). As licenças e bases legais das demais fontes ainda precisam ser documentadas; a licença do código do projeto não determina a licença dos datasets.
 
 ## Estrutura do repositório
 
@@ -52,6 +52,13 @@ slides/               Apresentação
 A estrutura completa exigida para a entrega também prevê arquivos de pipeline, experimentos, artigo e apresentação, a serem desenvolvidos nas respectivas tarefas.
 
 ## Reprodução
+
+Com os arquivos de [fontes de dados](docs/fontes-de-dados.md) em `data/raw/` (conferir o SHA-256):
+
+```powershell
+python src/data/grade.py                 # data/interim/grade.parquet (11.278 células de 1 km)
+python src/features/construir_base.py    # data/processed/base_celula_ano.parquet
+```
 
 ## Resultados
 

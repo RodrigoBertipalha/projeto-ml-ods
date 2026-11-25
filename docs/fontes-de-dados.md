@@ -75,8 +75,39 @@ Citação: Souza et al. (2020). *Reconstructing Three Decades of Land Use and
 Land Cover Changes in Brazilian Biomes with Landsat Archive and Earth Engine*.
 Remote Sensing 12(17). https://doi.org/10.3390/rs12172735
 
+## Chuva CHIRPS v2.0 — Climate Hazards Center/UCSB
+
+Exportado do Google Earth Engine (asset `UCSB-CHG/CHIRPS/DAILY`) com
+`src/data/gee_chirps.js`; arquivo anexado à issue #7 e salvo em 24/11/2026.
+GeoTIFF `float32`, 9 bandas `chuva_t2017` … `chuva_t2025`, em mm, cada uma
+somando 1º/ago de t−2 a 31/jul de t−1. EPSG:4326, 0,05° (24 × 28 pixels),
+limites lon −41,0 a −39,8, lat −10,0 a −8,6.
+
+| Arquivo (`data/raw/chirps/`) | Tamanho | SHA-256 |
+|---|---|---|
+| `chirps_petrolina_juazeiro_t2017_2025.tif` | 32.972 B (32 KB) | `e6e04c8eb1705e3470f04dac8757bbdf9ffb890d5858619bfd0adce4a8ed99d3` |
+
+Citação: Funk et al. (2015). *The climate hazards infrared precipitation with
+stations — a new environmental record for monitoring extremes*. Scientific
+Data 2, 150066. https://doi.org/10.1038/sdata.2015.66
+
+## Vias — OpenStreetMap (Geofabrik), versão de 1º/jan/2020
+
+Extrato do Nordeste brasileiro na data de 1º/jan/2020, o mais antigo mantido
+pela Geofabrik (há versões anuais de 2020 em diante). Só vias principais
+(`motorway`, `trunk`, `primary`, `secondary` e `_link`) são usadas (D9).
+Licença ODbL 1.0, © OpenStreetMap contributors.
+
+Origem: `https://download.geofabrik.de/south-america/brazil/nordeste/nordeste-200101.osm.pbf`
+(acesso em 24/11/2026; tamanho conferido com o `Content-Length` do servidor,
+que não publica MD5 para versões antigas).
+
+| Arquivo (`data/raw/osm/`) | Tamanho | SHA-256 |
+|---|---|---|
+| `nordeste-200101.osm.pbf` | 128.435.878 B (122,5 MB) | `5201c332f0bf69315ea4984b20212e514e60df99148684fd7b569f8bf4aefbf6` |
+
 ## Grade e limites municipais — IBGE via geobr
 
-Não fica em `data/raw/`: `src/data/grid_teste.py` baixa a malha municipal IBGE
+Não fica em `data/raw/`: `src/data/grade.py` baixa a malha municipal IBGE
 2022 pelo pacote `geobr` (cache do próprio pacote) e gera
-`data/interim/grade_teste.parquet`.
+`data/interim/grade.parquet`.
