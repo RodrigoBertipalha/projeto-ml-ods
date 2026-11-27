@@ -117,6 +117,8 @@ Geofabrik; a API histórica (ohsome) recusou a extração de geometria (HTTP 403
 atributo. Como as vias principais cresceram ~15% de 2016 a 2020, o efeito é
 pequeno, mas existe; citar na seção de limitações do artigo.
 
+**Verificação (revisão da T7):** o efeito desse possível vazamento será medido por ablação: treinar os modelos com e sem `dist_via_principal_km` e comparar a PR-AUC (T14/T16). Se a diferença for relevante, a coluna é discutida ou retirada.
+
 ## D10. Rótulo do ano anterior (`alvo_t1`)
 
 **Decisão:** inclui `alvo_t1` (≥ 1 ha de incremento PRODES em t−1).
