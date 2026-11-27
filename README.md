@@ -45,6 +45,8 @@ A licença MIT do repositório vale para o código, não para os dados. Cada bas
 
 A base derivada (`data/processed/`) herda as cláusulas de compartilhamento pela mesma licença do PRODES (CC BY-SA 4.0) e do OSM (ODbL) se for redistribuída.
 
+**LGPD:** a base não contém dados pessoais. Cada linha é uma célula de terreno de 1 km² num ano, sem informação sobre proprietários, ocupantes ou qualquer pessoa identificável; por isso a LGPD (Lei 13.709/2018) não se aplica. A redistribuição da base processada como release aguarda confirmação do professor sobre as licenças de compartilhamento pela mesma licença.
+
 ## Estrutura do repositório
 
 ```text
