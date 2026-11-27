@@ -70,16 +70,43 @@ A estrutura completa exigida para a entrega também prevê arquivos de pipeline,
 
 ## Reprodução
 
-MapBiomas e CHIRPS são exportados à mão no Google Earth Engine (`src/data/gee_mapbiomas.js` e `src/data/gee_chirps.js`) e copiados para `data/raw/mapbiomas/` e `data/raw/chirps/`. O resto é baixado e conferido por script:
+MapBiomas e CHIRPS são exportados manualmente no Google Earth Engine
+([MapBiomas](src/data/gee_mapbiomas.js) e [CHIRPS](src/data/gee_chirps.js))
+e copiados para `data/raw/mapbiomas/` e `data/raw/chirps/`. Os demais dados são
+baixados e conferidos pelo script `src/data/download.py`, que cria apenas arquivos
+ausentes e verifica seus hashes. Consulte [fontes de dados](docs/fontes-de-dados.md).
 
-```powershell
-python src/data/download.py              # baixa PRODES, focos e OSM e confere o SHA-256 de tudo
-python src/data/grade.py                 # data/interim/grade.parquet (11.278 células de 1 km)
-python src/features/construir_base.py    # data/processed/base_celula_ano.parquet
-python src/data/dicionario.py            # atualiza docs/dicionario-de-dados.md
+### Ambiente em contêiner
+
+O Docker prepara o ambiente Python com dependências fixadas. A execução padrão
+verifica as bibliotecas e informa a semente; o treinamento ainda será implementado
+na T12/T13. Na raiz do projeto, com Docker instalado:
+
+```bash
+docker build -t projeto-ml .
+docker run --rm projeto-ml
 ```
 
-`download.py` é o único script que grava em `data/raw/`: cria só arquivos que faltam, depois de conferir o hash, e nunca sobrescreve.
+A semente padrão é `42` e pode ser alterada com `-e SEED=123`. A imagem não
+inclui dados. Depois de obter os dados brutos, monte a pasta `data` para gerar a
+grade e a base processada e preservá-las no computador:
+
+```bash
+docker run --rm -v "$(pwd)/data:/app/data" projeto-ml make data
+```
+
+`make data` executa `src/data/grade.py` e `src/features/construir_base.py`; a
+malha municipal é baixada via `geobr`. Para obter as fontes e gerar o dicionário
+fora do contêiner, consulte os comandos abaixo:
+
+```bash
+python src/data/download.py
+python src/data/dicionario.py
+```
+
+`make train` e `make all` retornam erro até o treinamento ser implementado. A
+redistribuição dos dados processados como release aguarda confirmação das licenças,
+conforme a seção de dados; não há download automático dessa base nesta etapa.
 
 ## Resultados
 
