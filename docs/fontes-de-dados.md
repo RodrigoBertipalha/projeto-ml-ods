@@ -1,26 +1,38 @@
 # Fontes de dados
 
-Arquivos brutos usados no projeto. Ficam em `data/raw/` (fora do git) e foram
-baixados manualmente; nenhum script grava nessa pasta. O SHA-256 permite
-verificar que cada membro do grupo está usando exatamente os mesmos arquivos:
+Arquivos brutos usados no projeto. Ficam em `data/raw/` (fora do git). O
+SHA-256 permite verificar que cada membro do grupo está usando exatamente os
+mesmos arquivos. `src/data/download.py` lê as tabelas deste documento:
 
 ```powershell
-Get-ChildItem data\raw -Recurse -File | Get-FileHash -Algorithm SHA256
+python src/data/download.py              # baixa PRODES, focos e OSM que faltarem e confere tudo
+python src/data/download.py --verificar  # só confere
 ```
 
-Recorte de teste (T3): retângulo lon −40,97 a −39,84, lat −10,00 a −8,61
+`download.py` é o único script que grava em `data/raw/`, e só cria arquivos
+que ainda não existem, depois de conferir o hash (nunca sobrescreve).
+MapBiomas e CHIRPS são passos manuais no Google Earth Engine; o script só
+confere se estão na pasta.
+
+Recorte do projeto (T1/T3): retângulo lon −40,97 a −39,84, lat −10,00 a −8,61
 (EPSG:4674/4326), que contém Petrolina-PE (2611101) e Juazeiro-BA (2918407).
-Data de acesso de todos os arquivos: **23/11/2026**.
 
 ## PRODES Caatinga — INPE/TerraBrasilis
 
 Polígonos de desmatamento por ano, obtidos do GeoServer do TerraBrasilis (WFS)
-já filtrados pelo retângulo do recorte. CRS EPSG:4674.
+já filtrados pelo retângulo do recorte. CRS EPSG:4674. Acesso em 23/11/2026.
+Licença CC BY-SA 4.0 (INPE, Programa BiomasBR).
 
-| Arquivo (`data/raw/prodes/`) | Tamanho | SHA-256 |
-|---|---|---|
-| `yearly_deforestation.zip` | 13.505.718 B (12,9 MB) | `8e90e91066d2c395684fe1254f54f15e752d195fba36776018ce501b7753886b` |
-| `accumulated_deforestation_2000.zip` | 11.431.697 B (10,9 MB) | `c45d504b7a589be05351b44bb43d3909cfd262a3e98e69f1ce5f508a8da04eea` |
+O GeoServer monta o zip na hora e grava a data do download no cabeçalho do
+`.dbf`, então o SHA-256 do arquivo muda a cada download mesmo sem mudança nos
+dados (verificado em 24/11/2026: só os bytes 1–3 do `.dbf` diferiram). Por
+isso há também o **SHA-256 do conteúdo**: arquivos internos em ordem de nome,
+com essa data zerada (`sha256_conteudo_zip` em `src/data/download.py`).
+
+| Arquivo (`data/raw/prodes/`) | Tamanho | SHA-256 do arquivo | SHA-256 do conteúdo |
+|---|---|---|---|
+| `yearly_deforestation.zip` | 13.505.718 B (12,9 MB) | `8e90e91066d2c395684fe1254f54f15e752d195fba36776018ce501b7753886b` | `05139ccc6a0e4a1af52bf32a3431a042cd7e0ba6a5a58b2daa3cd01d83e2d6f2` |
+| `accumulated_deforestation_2000.zip` | 11.431.697 B (10,9 MB) | `c45d504b7a589be05351b44bb43d3909cfd262a3e98e69f1ce5f508a8da04eea` | `10d2b03f1d6cc3f84b42006b3fa5b50ecc305a8b11d48b03b41c00d52ca4b726` |
 
 URLs de origem (a segunda troca apenas o nome da camada):
 
@@ -44,6 +56,7 @@ o usado pelo INPE para comparar anos. Colunas: `id_bdq`, `foco_id`, `lat`,
 `lon`, `data_pas` (UTC), `pais`, `estado`, `municipio`, `bioma`.
 
 Origem: `https://dataserver-coids.inpe.br/queimadas/queimadas/focos/csv/anual/Brasil_sat_ref/<arquivo>`
+(acesso em 23/11/2026; baixado de novo em 24/11/2026 com SHA-256 idêntico).
 
 | Arquivo (`data/raw/queimadas/`) | Tamanho | SHA-256 |
 |---|---|---|
@@ -75,8 +88,39 @@ Citação: Souza et al. (2020). *Reconstructing Three Decades of Land Use and
 Land Cover Changes in Brazilian Biomes with Landsat Archive and Earth Engine*.
 Remote Sensing 12(17). https://doi.org/10.3390/rs12172735
 
+## Chuva CHIRPS v2.0 — Climate Hazards Center/UCSB
+
+Exportado do Google Earth Engine (asset `UCSB-CHG/CHIRPS/DAILY`) com
+`src/data/gee_chirps.js`; arquivo anexado à issue #7 e salvo em 24/11/2026.
+GeoTIFF `float32`, 9 bandas `chuva_t2017` … `chuva_t2025`, em mm, cada uma
+somando 1º/ago de t−2 a 31/jul de t−1. EPSG:4326, 0,05° (24 × 28 pixels),
+limites lon −41,0 a −39,8, lat −10,0 a −8,6. Domínio público (CC0).
+
+| Arquivo (`data/raw/chirps/`) | Tamanho | SHA-256 |
+|---|---|---|
+| `chirps_petrolina_juazeiro_t2017_2025.tif` | 32.972 B (32 KB) | `e6e04c8eb1705e3470f04dac8757bbdf9ffb890d5858619bfd0adce4a8ed99d3` |
+
+Citação: Funk et al. (2015). *The climate hazards infrared precipitation with
+stations — a new environmental record for monitoring extremes*. Scientific
+Data 2, 150066. https://doi.org/10.1038/sdata.2015.66
+
+## Vias — OpenStreetMap (Geofabrik), versão de 1º/jan/2020
+
+Extrato do Nordeste brasileiro na data de 1º/jan/2020, o mais antigo mantido
+pela Geofabrik (há versões anuais de 2020 em diante). Só vias principais
+(`motorway`, `trunk`, `primary`, `secondary` e `_link`) são usadas (D9).
+Licença ODbL 1.0, © OpenStreetMap contributors.
+
+Origem: `https://download.geofabrik.de/south-america/brazil/nordeste/nordeste-200101.osm.pbf`
+(acesso em 24/11/2026; tamanho conferido com o `Content-Length` do servidor,
+que não publica MD5 para versões antigas).
+
+| Arquivo (`data/raw/osm/`) | Tamanho | SHA-256 |
+|---|---|---|
+| `nordeste-200101.osm.pbf` | 128.435.878 B (122,5 MB) | `5201c332f0bf69315ea4984b20212e514e60df99148684fd7b569f8bf4aefbf6` |
+
 ## Grade e limites municipais — IBGE via geobr
 
-Não fica em `data/raw/`: `src/data/grid_teste.py` baixa a malha municipal IBGE
+Não fica em `data/raw/`: `src/data/grade.py` baixa a malha municipal IBGE
 2022 pelo pacote `geobr` (cache do próprio pacote) e gera
-`data/interim/grade_teste.parquet`.
+`data/interim/grade.parquet`.

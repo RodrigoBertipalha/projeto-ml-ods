@@ -28,7 +28,24 @@ O estudo utiliza células de 1 km² e rótulos anuais de 2017 a 2025. O alvo ind
 - **Programa Queimadas (INPE):** focos de queimadas do satélite de referência.
 - **IBGE, via geobr:** limites municipais para construção da grade.
 
-Para a base completa, está prevista a avaliação de precipitação do **CHIRPS** e estradas do **OpenStreetMap**, sujeitas à disponibilidade e ao controle de vazamento. Origens, arquivos e hashes das fontes utilizadas estão em [fontes de dados](docs/fontes-de-dados.md). As licenças e bases legais das demais fontes ainda precisam ser documentadas; a licença do código do projeto não determina a licença dos datasets.
+A base completa acrescenta precipitação do **CHIRPS** e distância a vias principais do **OpenStreetMap**, com o controle de vazamento descrito nas [decisões técnicas](docs/decisoes-tecnicas.md). Origens, arquivos e hashes das fontes utilizadas estão em [fontes de dados](docs/fontes-de-dados.md); cada coluna da base está descrita no [dicionário de dados](docs/dicionario-de-dados.md).
+
+### Licenças dos dados
+
+A licença MIT do repositório vale para o código, não para os dados. Cada base mantém a sua:
+
+| Base | Licença | Atribuição |
+|---|---|---|
+| PRODES Caatinga (INPE/TerraBrasilis) | CC BY-SA 4.0 | INPE, Programa BiomasBR/PRODES |
+| Focos de queimada (INPE/BDQueimadas) | Dados abertos do INPE (licença específica não indicada na página de download) | INPE, Programa Queimadas |
+| MapBiomas Coleção 10 | CC BY 4.0 | Projeto MapBiomas; Souza et al. (2020) |
+| CHIRPS v2.0 | Domínio público (CC0) | Climate Hazards Center/UCSB; Funk et al. (2015) |
+| OpenStreetMap (Geofabrik) | ODbL 1.0 | © OpenStreetMap contributors |
+| Malha municipal (IBGE, via geobr) | Dados públicos do IBGE | IBGE |
+
+A base derivada (`data/processed/`) herda as cláusulas de compartilhamento pela mesma licença do PRODES (CC BY-SA 4.0) e do OSM (ODbL) se for redistribuída.
+
+**LGPD:** a base não contém dados pessoais. Cada linha é uma célula de terreno de 1 km² num ano, sem informação sobre proprietários, ocupantes ou qualquer pessoa identificável; por isso a LGPD (Lei 13.709/2018) não se aplica. A redistribuição da base processada como release aguarda confirmação do professor sobre as licenças de compartilhamento pela mesma licença.
 
 ## Estrutura do repositório
 
@@ -52,6 +69,17 @@ slides/               Apresentação
 A estrutura completa exigida para a entrega também prevê arquivos de pipeline, experimentos, artigo e apresentação, a serem desenvolvidos nas respectivas tarefas.
 
 ## Reprodução
+
+MapBiomas e CHIRPS são exportados à mão no Google Earth Engine (`src/data/gee_mapbiomas.js` e `src/data/gee_chirps.js`) e copiados para `data/raw/mapbiomas/` e `data/raw/chirps/`. O resto é baixado e conferido por script:
+
+```powershell
+python src/data/download.py              # baixa PRODES, focos e OSM e confere o SHA-256 de tudo
+python src/data/grade.py                 # data/interim/grade.parquet (11.278 células de 1 km)
+python src/features/construir_base.py    # data/processed/base_celula_ano.parquet
+python src/data/dicionario.py            # atualiza docs/dicionario-de-dados.md
+```
+
+`download.py` é o único script que grava em `data/raw/`: cria só arquivos que faltam, depois de conferir o hash, e nunca sobrescreve.
 
 ## Resultados
 
